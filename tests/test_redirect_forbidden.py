@@ -3,9 +3,23 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_plugin_is_installed():
-    datasette = Datasette([], memory=True)
-    response = await datasette.client.get("/-/plugins.json")
-    assert response.status_code == 200
-    installed_plugins = {p["name"] for p in response.json()}
-    assert "datasette-redirect-forbidden" in installed_plugins
+async def test_redirect():
+    path = "/"
+    datasette = Datasette(
+        [],
+        memory=True,
+        metadata={
+            "allow": {
+                "id": "root",
+            },
+            "plugins": {"datasette-redirect-forbidden": {"redirect_to": "/-/login"}},
+        },
+    )
+    response = await datasette.client.get(path)
+    assert response.status_code == 302
+    assert response.headers["location"] == "/-/login"
+    # But root works OK
+    root_response = await datasette.client.get(
+        path, cookies={"ds_actor": datasette.sign({"a": {"id": "root"}}, "actor")}
+    )
+    assert root_response.status_code == 200
