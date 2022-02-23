@@ -15,7 +15,14 @@ Install this plugin in the same environment as Datasette.
 
 ## Usage
 
-Usage instructions go here.
+Add the following to your `metadata.yml` (or `metadata.json`) file to configure the plugin:
+
+```yaml
+plugins:
+  datasette-redirect-forbidden:
+    redirect_to: /-/login
+```
+Any 403 forbidden pages will redirect to the specified page.
 
 ## Development
 
